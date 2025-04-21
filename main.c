@@ -7,11 +7,9 @@
 #include "FFT.h"
 #include "bmp.h"
 
-int main() {
-    const char *inputFilename = "./Input images/lena.bmp";
-    const char *fftDisplayFilename = "./Output images/fft_result.bmp";
-    const char *ifftFilename = "./Output images/ifft_result.bmp";
+#define focusConst 1.2
 
+int processFFT(const char *inputFilename, const char *fftDisplayFilename, const char *ifftFilename) {
     // Read BMP image.
     BMPImage *image = readBMP(inputFilename);
     if (!image) {
@@ -45,6 +43,40 @@ int main() {
     RGBfree(fft);
     RGBfree(fftShifted);
     RGBfree(ifft);
+
+    return 0;
+}
+
+int checkFocus (const char *inputFilename) {
+    BMPImage *image = readBMP(inputFilename);
+    int width = image->width, height = image->height;
+    int total = width * height;
+
+    complexRGB *fft = RGBforwardFFT(image);
+    complexRGB *fftShifted = RGBFFTshift(fft, width, height);
+    double ER = RGBenergyRatio(fftShifted, width, height);
+
+    freeBMPImage(image);
+    RGBfree(fft);
+    RGBfree(fftShifted);
+
+    if (ER < 1.2)
+        return 0;
+    else 
+        return 1;
+}
+
+int main() {
+    const char *inputFilename = "./Input images/lena.bmp";
+    const char *fftDisplayFilename = "./Output images/fft_result.bmp";
+    const char *ifftFilename = "./Output images/ifft_result.bmp";
+
+ //   processFFT(inputFilename, fftDisplayFilename, ifftFilename);
+
+    if (checkFocus("./Input images/image.bmp"))
+        printf("Sharp\n");
+    else
+        printf("Blurry\n");
 
     return 0;
 }

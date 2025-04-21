@@ -42,7 +42,7 @@ BMPImage* readBMP(const char *filename) {
         return NULL;
     }
 
-    printf("%i \n", img->height);
+ //   printf("%i \n", img->height);
     for (int i = 0; i < img->height; i++) {
         img->pixels[i] = malloc(img->width * sizeof(Pixel));
         if (!img->pixels[i]) {

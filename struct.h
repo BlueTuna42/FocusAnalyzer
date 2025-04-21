@@ -7,6 +7,7 @@
 #include <math.h>
 #include <fftw3.h>
 
+
 #pragma pack(push, 1)
 
 typedef struct {

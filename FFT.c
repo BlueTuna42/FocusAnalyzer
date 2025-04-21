@@ -1,7 +1,9 @@
 #include "struct.h"
 #include "bmp.h"
 
-#define threshold 5
+#define SQthreshold 6
+#define LNthreshold 100
+
 
 double energyRatio (fftw_complex *in, int width, int height) {
 	int total = width * height;
@@ -14,12 +16,14 @@ double energyRatio (fftw_complex *in, int width, int height) {
     			int x = j - width/2;  
     			int y = i - height/2;
     			int k = i * width + j;
-    			if ((abs(x) < width/(2*threshold) && abs(y) < height/(2*threshold)) || (abs(x) < width/(pow(threshold,2)) || abs(y) < height/(pow(threshold,2)))) {
-    				mag_high += log(1 + sqrt(in[k][0]*in[k][0] + in[k][1]*in[k][1]));
-    				nHigh++;
-    			} else {
+    			if ((abs(x) < width/(2*SQthreshold) && abs(y) < height/(2*SQthreshold)) || (abs(x) < width/(LNthreshold) || abs(y) < height/(LNthreshold))) {
     				mag_low += log(1 + sqrt(in[k][0]*in[k][0] + in[k][1]*in[k][1]));
     				nLow++;
+                    in[k][0] = 0;
+                    in[k][1] = 0;
+    			} else {
+    				mag_high += log(1 + sqrt(in[k][0]*in[k][0] + in[k][1]*in[k][1]));
+    				nHigh++;
     			}
     		}
     	}

@@ -3,11 +3,15 @@
 #include <stdint.h>
 #include <math.h>
 #include <fftw3.h>
+#include <string.h>
+
 #include "struct.h"
 #include "FFT.h"
 #include "bmp.h"
+#include "scan.h"
 
 #define focusConst 1.2
+#define PATH_MAX 256
 
 int processFFT(const char *inputFilename, const char *fftDisplayFilename, const char *ifftFilename) {
     // Read BMP image.
@@ -66,17 +70,37 @@ int checkFocus (const char *inputFilename) {
         return 1;
 }
 
+char* concat(const char *s1, const char *s2) {
+    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
+    // in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
+
+
 int main() {
-    const char *inputFilename = "./Input images/lena.bmp";
-    const char *fftDisplayFilename = "./Output images/fft_result.bmp";
-    const char *ifftFilename = "./Output images/ifft_result.bmp";
+    char dirpath[PATH_MAX];
+    printf("Enter directory path: ");
+    if (!fgets(dirpath, sizeof(dirpath), stdin)) {
+        fprintf(stderr, "Error reading input.\n");
+        return 1;
+    }
 
- //   processFFT(inputFilename, fftDisplayFilename, ifftFilename);
+    dirpath[strcspn(dirpath, "\n")] = '\0';
+    size_t nfiles = 0;
+    char **bmp_files = scan_bmp_files(dirpath, &nfiles);
+    printf("Found %zu .bmp file(s):\n", nfiles);
 
-    if (checkFocus("./Input images/image.bmp"))
-        printf("Sharp\n");
-    else
-        printf("Blurry\n");
+    for (size_t i = 0; i < nfiles; i++) {
+        if (checkFocus(concat(dirpath, bmp_files[i])))
+            printf(concat(bmp_files[i], " is sharp\n"));
+        else
+            printf(concat(bmp_files[i], " is blurry\n"));
+
+        free(bmp_files[i]);
+        }
+        free(bmp_files);
 
     return 0;
 }
